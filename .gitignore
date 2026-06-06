@@ -1,3 +1,5 @@
 node_modules/
 .env
 workout.db
+workout.db-shm
+workout.db-wal
