@@ -9,3 +9,6 @@ db.pragma('foreign_keys = ON')
 db.exec(schema)
 
 export default db
+
+import { seedDatabase } from './seed.js'
+seedDatabase()
