@@ -1,10 +1,14 @@
 import express from 'express'
+import 'dotenv/config'
 import './db/database.js'
+import authRoutes from './routes/auth.js'
 
 const app = express()
-const PORT = 3000
+const PORT = process.env.PORT || 3000
 
 app.use(express.json())
+
+app.use('/auth', authRoutes)
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' })
