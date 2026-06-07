@@ -6,6 +6,7 @@ import exerciseRoutes from './routes/exercises.js'
 import repMaxRoutes from './routes/repmax.js'
 import programRoutes from './routes/programs.js'
 import sessionRoutes from './routes/sessions.js'
+import progressRoutes from './routes/progress.js'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -17,6 +18,7 @@ app.use('/exercises', exerciseRoutes)
 app.use('/repmax', repMaxRoutes)
 app.use('/programs', programRoutes)
 app.use('/sessions', sessionRoutes)
+app.use('/progress', progressRoutes)
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' })
