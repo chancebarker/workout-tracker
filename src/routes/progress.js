@@ -6,39 +6,34 @@ const router = Router()
 
 router.use(authenticate)
 
-// Get weight progression over time for a specific exercise
-router.get('/exercise/:id', (req, res) => {
+// Per-exercise progression over time, one data point per workout date:
+// best (heaviest) set, best reps, and total volume that day.
+router.get('/exercise/:exerciseId', (req, res) => {
   const userId = req.user.user_id
-  const exerciseId = req.params.id
+  const exerciseId = req.params.exerciseId
 
   const exercise = db.prepare('SELECT id, name FROM exercises WHERE id = ?').get(exerciseId)
-  if (!exercise) {
-    return res.status(404).json({ error: 'Exercise not found' })
-  }
+  if (!exercise) return res.status(404).json({ error: 'Exercise not found' })
 
-  // Get the best set (highest actual weight) per session for this exercise
-  const progression = db.prepare(`
+  const data_points = db.prepare(`
     SELECT
-      ws.started_at as session_date,
-      MAX(ls.actual_weight) as best_weight,
-      MAX(ls.actual_reps) as reps_at_best,
-      COUNT(*) as total_sets,
-      SUM(ls.actual_weight * ls.actual_reps) as volume
-    FROM logged_sets ls
-    JOIN workout_sessions ws ON ls.workout_session_id = ws.id
-    JOIN user_programs up ON ws.user_program_id = up.id
-    WHERE up.user_id = ? AND ls.exercise_id = ? AND ws.completed_at IS NOT NULL
-    GROUP BY ws.id
-    ORDER BY ws.started_at ASC
+      w.date,
+      MAX(s.weight) as best_weight,
+      MAX(s.reps) as best_reps,
+      SUM(COALESCE(s.weight, 0) * COALESCE(s.reps, 0)) as volume,
+      COUNT(s.id) as total_sets
+    FROM sets s
+    JOIN workout_exercises we ON s.workout_exercise_id = we.id
+    JOIN workouts w ON we.workout_id = w.id
+    WHERE w.user_id = ? AND we.exercise_id = ?
+    GROUP BY w.date
+    ORDER BY w.date ASC
   `).all(userId, exerciseId)
 
-  res.json({
-    exercise_name: exercise.name,
-    data_points: progression
-  })
+  res.json({ exercise_id: exercise.id, exercise_name: exercise.name, data_points })
 })
 
-// Personal records -- best set ever per exercise
+// Heaviest single set ever, per exercise the user has logged.
 router.get('/prs', (req, res) => {
   const userId = req.user.user_id
 
@@ -46,61 +41,42 @@ router.get('/prs', (req, res) => {
     SELECT
       e.id as exercise_id,
       e.name as exercise_name,
-      e.category,
-      MAX(ls.actual_weight) as pr_weight,
-      ls.actual_reps as reps,
-      ws.started_at as achieved_at
-    FROM logged_sets ls
-    JOIN exercises e ON ls.exercise_id = e.id
-    JOIN workout_sessions ws ON ls.workout_session_id = ws.id
-    JOIN user_programs up ON ws.user_program_id = up.id
-    WHERE up.user_id = ? AND ws.completed_at IS NOT NULL
-    GROUP BY ls.exercise_id
+      e.primary_muscle,
+      MAX(s.weight) as best_weight
+    FROM sets s
+    JOIN workout_exercises we ON s.workout_exercise_id = we.id
+    JOIN workouts w ON we.workout_id = w.id
+    JOIN exercises e ON we.exercise_id = e.id
+    WHERE w.user_id = ? AND s.weight IS NOT NULL
+    GROUP BY e.id
     ORDER BY e.name
   `).all(userId)
 
   res.json(prs)
 })
 
-// Overall summary stats
+// Headline totals for the user.
 router.get('/summary', (req, res) => {
   const userId = req.user.user_id
 
-  const sessionCount = db.prepare(`
-    SELECT COUNT(*) as total
-    FROM workout_sessions ws
-    JOIN user_programs up ON ws.user_program_id = up.id
-    WHERE up.user_id = ? AND ws.completed_at IS NOT NULL
-  `).get(userId)
+  const { workouts } = db.prepare(
+    'SELECT COUNT(*) as workouts FROM workouts WHERE user_id = ?'
+  ).get(userId)
 
-  const totalVolume = db.prepare(`
-    SELECT COALESCE(SUM(ls.actual_weight * ls.actual_reps), 0) as total
-    FROM logged_sets ls
-    JOIN workout_sessions ws ON ls.workout_session_id = ws.id
-    JOIN user_programs up ON ws.user_program_id = up.id
-    WHERE up.user_id = ? AND ws.completed_at IS NOT NULL
-  `).get(userId)
-
-  const totalSets = db.prepare(`
-    SELECT COUNT(*) as total
-    FROM logged_sets ls
-    JOIN workout_sessions ws ON ls.workout_session_id = ws.id
-    JOIN user_programs up ON ws.user_program_id = up.id
-    WHERE up.user_id = ? AND ws.completed_at IS NOT NULL
-  `).get(userId)
-
-  const activeProgram = db.prepare(`
-    SELECT pt.name, up.current_week, up.current_day, pt.duration_weeks
-    FROM user_programs up
-    JOIN program_templates pt ON up.program_template_id = pt.id
-    WHERE up.user_id = ? AND up.is_active = 1
+  const { total_sets, total_volume } = db.prepare(`
+    SELECT
+      COUNT(s.id) as total_sets,
+      COALESCE(SUM(COALESCE(s.weight, 0) * COALESCE(s.reps, 0)), 0) as total_volume
+    FROM sets s
+    JOIN workout_exercises we ON s.workout_exercise_id = we.id
+    JOIN workouts w ON we.workout_id = w.id
+    WHERE w.user_id = ?
   `).get(userId)
 
   res.json({
-    sessions_completed: sessionCount.total,
-    total_volume_lbs: totalVolume.total,
-    total_sets: totalSets.total,
-    active_program: activeProgram || null
+    workouts,
+    total_sets,
+    total_volume_lbs: total_volume
   })
 })
 
