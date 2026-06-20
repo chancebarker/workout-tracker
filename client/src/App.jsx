@@ -1,20 +1,21 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import Layout from './components/Layout'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import Dashboard from './pages/Dashboard'
-import WorkoutSession from './pages/WorkoutSession'
-import Progress from './pages/Progress'
-import Exercises from './pages/Exercises'
+import CalendarPage from './pages/CalendarPage'
+import WorkoutPage from './pages/WorkoutPage'
+import MetricsPage from './pages/MetricsPage'
+import ProgressPage from './pages/ProgressPage'
 
 function PrivateRoute({ children }) {
   const { isAuthenticated } = useAuth()
-  return isAuthenticated ? children : <Navigate to="/login" />
+  return isAuthenticated ? <Layout>{children}</Layout> : <Navigate to="/login" />
 }
 
 function PublicRoute({ children }) {
   const { isAuthenticated } = useAuth()
-  return isAuthenticated ? <Navigate to="/dashboard" /> : children
+  return isAuthenticated ? <Navigate to="/" /> : children
 }
 
 function AppRoutes() {
@@ -22,11 +23,11 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-      <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-      <Route path="/session/:sessionId" element={<PrivateRoute><WorkoutSession /></PrivateRoute>} />
-      <Route path="/progress" element={<PrivateRoute><Progress /></PrivateRoute>} />
-      <Route path="/exercises" element={<PrivateRoute><Exercises /></PrivateRoute>} />
-      <Route path="*" element={<Navigate to="/login" />} />
+      <Route path="/" element={<PrivateRoute><CalendarPage /></PrivateRoute>} />
+      <Route path="/workout/:id" element={<PrivateRoute><WorkoutPage /></PrivateRoute>} />
+      <Route path="/metrics" element={<PrivateRoute><MetricsPage /></PrivateRoute>} />
+      <Route path="/progress" element={<PrivateRoute><ProgressPage /></PrivateRoute>} />
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   )
 }

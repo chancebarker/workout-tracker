@@ -18,7 +18,7 @@ export default function Login() {
     try {
       const { token } = await api.login({ email, password })
       login(token)
-      navigate('/dashboard')
+      navigate('/')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -27,24 +27,39 @@ export default function Login() {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: '100px auto', padding: '0 20px' }}>
-      <h1>Workout Tracker</h1>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 12 }}>
-          <label>Email</label><br />
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} required style={{ width: '100%', padding: 8 }} />
-        </div>
-        <div style={{ marginBottom: 12 }}>
-          <label>Password</label><br />
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required style={{ width: '100%', padding: 8 }} />
-        </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" disabled={loading} style={{ width: '100%', padding: 10 }}>
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
-      <p>Don't have an account? <Link to="/register">Register</Link></p>
+    <div className="min-h-full flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        <h1 className="text-3xl font-bold text-white text-center mb-1">🏋️ Tracker</h1>
+        <p className="text-muted text-center mb-8">Log in to your training log</p>
+
+        <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-xl p-6 space-y-4">
+          <div>
+            <label className="block text-sm text-muted mb-1">Email</label>
+            <input
+              type="email" value={email} onChange={e => setEmail(e.target.value)} required
+              className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-border text-white focus:outline-none focus:border-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-muted mb-1">Password</label>
+            <input
+              type="password" value={password} onChange={e => setPassword(e.target.value)} required
+              className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-border text-white focus:outline-none focus:border-accent"
+            />
+          </div>
+          {error && <p className="text-danger text-sm">{error}</p>}
+          <button
+            type="submit" disabled={loading}
+            className="w-full py-2 rounded-lg bg-accent hover:bg-accent-hover text-white font-medium transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Logging in…' : 'Log in'}
+          </button>
+        </form>
+
+        <p className="text-center text-muted text-sm mt-4">
+          No account? <Link to="/register" className="text-accent hover:underline">Register</Link>
+        </p>
+      </div>
     </div>
   )
 }

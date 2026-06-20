@@ -16,10 +16,14 @@ async function request(path, options = {}) {
     }
   })
 
+  // 204 No Content has no body to parse
+  if (res.status === 204) return null
+
   const data = await res.json()
 
   if (!res.ok) {
-    throw new Error(data.error || 'Something went wrong')
+    const message = typeof data.error === 'string' ? data.error : 'Request failed'
+    throw new Error(message)
   }
 
   return data
@@ -35,29 +39,41 @@ export const api = {
     const query = new URLSearchParams(params).toString()
     return request(`/exercises${query ? '?' + query : ''}`)
   },
-  getExercise: (id) => request(`/exercises/${id}`),
   createExercise: (body) => request('/exercises', { method: 'POST', body: JSON.stringify(body) }),
 
-  // Rep Max
-  submitRepMax: (exerciseId, body) => request(`/repmax/${exerciseId}`, { method: 'POST', body: JSON.stringify(body) }),
-  getRepMaxHistory: (exerciseId) => request(`/repmax/${exerciseId}`),
-  getAllRepMaxes: () => request('/repmax'),
+  // Workouts
+  getWorkouts: (params = {}) => {
+    const query = new URLSearchParams(params).toString()
+    return request(`/workouts${query ? '?' + query : ''}`)
+  },
+  getWorkout: (id) => request(`/workouts/${id}`),
+  createWorkout: (body) => request('/workouts', { method: 'POST', body: JSON.stringify(body) }),
+  updateWorkout: (id, body) => request(`/workouts/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteWorkout: (id) => request(`/workouts/${id}`, { method: 'DELETE' }),
 
-  // Programs
-  getPrograms: () => request('/programs'),
-  getProgram: (id) => request(`/programs/${id}`),
-  enrollInProgram: (id) => request(`/programs/enroll/${id}`, { method: 'POST' }),
-  getActiveProgram: () => request('/programs/me/active'),
+  // Workout exercises + sets
+  addExercise: (workoutId, exerciseId) =>
+    request(`/workouts/${workoutId}/exercises`, { method: 'POST', body: JSON.stringify({ exercise_id: exerciseId }) }),
+  removeExercise: (workoutId, weId) =>
+    request(`/workouts/${workoutId}/exercises/${weId}`, { method: 'DELETE' }),
+  addSet: (workoutId, weId) =>
+    request(`/workouts/${workoutId}/exercises/${weId}/sets`, { method: 'POST' }),
+  updateSet: (workoutId, weId, setId, body) =>
+    request(`/workouts/${workoutId}/exercises/${weId}/sets/${setId}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteSet: (workoutId, weId, setId) =>
+    request(`/workouts/${workoutId}/exercises/${weId}/sets/${setId}`, { method: 'DELETE' }),
 
-  // Sessions
-  startSession: () => request('/sessions', { method: 'POST' }),
-  logSet: (sessionId, body) => request(`/sessions/${sessionId}/sets`, { method: 'POST', body: JSON.stringify(body) }),
-  completeSession: (sessionId) => request(`/sessions/${sessionId}/complete`, { method: 'PATCH' }),
-  getSession: (sessionId) => request(`/sessions/${sessionId}`),
-  getSessions: () => request('/sessions'),
+  // Metrics
+  logMetric: (body) => request('/metrics', { method: 'POST', body: JSON.stringify(body) }),
+  getMetricTypes: () => request('/metrics/types'),
+  getMetricSeries: (type, params = {}) => {
+    const query = new URLSearchParams({ type, ...params }).toString()
+    return request(`/metrics?${query}`)
+  },
+  deleteMetric: (id) => request(`/metrics/${id}`, { method: 'DELETE' }),
 
   // Progress
+  getSummary: () => request('/progress/summary'),
   getExerciseProgress: (exerciseId) => request(`/progress/exercise/${exerciseId}`),
   getPRs: () => request('/progress/prs'),
-  getSummary: () => request('/progress/summary'),
 }
