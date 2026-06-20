@@ -160,7 +160,7 @@ export default function WorkoutPage() {
 
       <div className="space-y-4">
         {workout.exercises.map(ex => {
-          const prev = formatPrevious(ex.id)
+          const prev = formatPrevious(ex.exercise_id)
           return (
           <div key={ex.id} className="bg-surface border border-border rounded-xl p-4">
             <div className="flex items-center justify-between mb-2">
