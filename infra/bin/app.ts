@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register'
 import * as cdk from 'aws-cdk-lib'
+import { AwsSolutionsChecks } from 'cdk-nag'
 import { WorkoutTrackerStack } from '../lib/workout-tracker-stack'
 
 const app = new cdk.App()
@@ -20,3 +21,10 @@ new WorkoutTrackerStack(app, 'WorkoutTrackerStack', {
     environment: 'demo',
   },
 })
+
+// Security linting with cdk-nag (AWS Solutions ruleset). Opt-in via `-c nag=true`
+// (npm run nag) so routine synth/deploy isn't blocked while iterating. Intentional
+// demo trade-offs are documented as suppressions inside the stack.
+if (app.node.tryGetContext('nag')) {
+  cdk.Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }))
+}

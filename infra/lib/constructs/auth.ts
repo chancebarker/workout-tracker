@@ -28,12 +28,13 @@ export class Auth extends Construct {
       standardAttributes: {
         fullname: { required: false, mutable: true },
       },
+      // Strong policy satisfies cdk-nag AwsSolutions-COG1 (length + upper + digit + symbol).
       passwordPolicy: {
         minLength: 8,
         requireLowercase: true,
         requireDigits: true,
-        requireUppercase: false,
-        requireSymbols: false,
+        requireUppercase: true,
+        requireSymbols: true,
       },
       // Advanced security adds risk-based MFA/anomaly detection (small cost). Enable for
       // anything resembling production, especially WWPS.

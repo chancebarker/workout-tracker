@@ -50,6 +50,24 @@ cd ../client && npm run build && cd ../infra && npx cdk deploy
 Outputs include `SiteUrl` (CloudFront), `ApiEndpoint`, `UserPoolId`, `UserPoolClientId`,
 and `SiteBucketName`.
 
+## Validate (tests + security linting)
+
+```bash
+cd infra
+npm install
+npm test            # CDK assertion tests (Jest) — encode the security & cost decisions
+npm run nag         # cdk synth with cdk-nag (AWS Solutions ruleset)
+```
+
+- **`npm test`** synthesizes the stack and asserts the decisions that matter: **0 NAT
+  gateways**, Aurora **scale-to-zero** + **encrypted** + Data API on, KMS rotation, S3
+  public-access fully blocked, Lambda X-Ray tracing, the **Cognito JWT authorizer**, the
+  CloudFront `/api/*` behavior, and the error alarm. Bundling is skipped in tests, so no
+  esbuild/Docker is needed.
+- **`npm run nag`** runs **cdk-nag**. Intentional demo gaps are captured as **documented
+  suppressions** in `lib/workout-tracker-stack.ts` — each one names the production fix.
+  This is the "how do you test/secure infrastructure?" interview answer.
+
 ## 💸 Cost warning — READ THIS
 
 This is a **demo** stack tuned for near-zero idle cost, but **a few things still bill while
@@ -82,7 +100,7 @@ tier — intentionally off here for clean teardown.)
 | Aurora min capacity > 0 / provisioned concurrency | Remove cold starts at a cost |
 | Multi-AZ / Aurora Global | HA and/or multi-region (see INTERVIEW-PREP.md) |
 | Cognito user-migration trigger | Migrate existing bcrypt users on first sign-in |
-| cdk-nag / assertion tests | Security linting + template tests in CI |
+| cdk-nag / assertion tests | ✅ **included** — `npm test` + `npm run nag` (wire into CI) |
 
 ## Security posture (as built)
 

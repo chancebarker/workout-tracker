@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib'
 import { Construct } from 'constructs'
+import { NagSuppressions } from 'cdk-nag'
 import { Network } from './constructs/network'
 import { Data } from './constructs/data'
 import { Auth } from './constructs/auth'
@@ -63,5 +64,87 @@ export class WorkoutTrackerStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserPoolId', { value: auth.userPool.userPoolId })
     new cdk.CfnOutput(this, 'UserPoolClientId', { value: auth.userPoolClient.userPoolClientId })
     new cdk.CfnOutput(this, 'SiteBucketName', { value: frontend.bucketName })
+
+    // ---- cdk-nag: intentional demo trade-offs, each with a justification ----
+    // These are the *documented* gaps between the cheap demo and a production build.
+    // In an interview: "cdk-nag runs in CI; every suppression is a conscious, reasoned
+    // decision, not an unknown." The production fixes are listed in infra/README.md.
+    NagSuppressions.addStackSuppressions(this, [
+      {
+        id: 'AwsSolutions-IAM4',
+        reason:
+          'AWS-managed policies appear only on CDK-generated custom-resource roles (e.g., S3 ' +
+          'autoDeleteObjects, BucketDeployment). Acceptable for a demo; not on app roles.',
+      },
+      {
+        id: 'AwsSolutions-IAM5',
+        reason:
+          'Wildcards come from least-privilege CDK grants (Data API actions on this cluster, ' +
+          'BucketDeployment to this bucket). Scope is constrained to project resources.',
+      },
+      {
+        id: 'AwsSolutions-VPC7',
+        reason: 'VPC Flow Logs omitted to avoid demo CloudWatch cost; enable for production / WWPS audit.',
+      },
+      {
+        id: 'AwsSolutions-RDS6',
+        reason:
+          'Direct IAM database authentication is not used because access goes through the RDS ' +
+          'Data API (IAM-authorized) with credentials in Secrets Manager — there are no direct ' +
+          'DB connections to authenticate. Enable IAM DB auth if switching to a pg driver.',
+      },
+      {
+        id: 'AwsSolutions-SMG4',
+        reason: 'Automatic secret rotation omitted for the demo (adds a rotation Lambda/cost); schedule rotation for production.',
+      },
+      {
+        id: 'AwsSolutions-COG2',
+        reason: 'MFA not required for the demo. Enable (and consider mandatory) for production / WWPS.',
+      },
+      {
+        id: 'AwsSolutions-COG8',
+        reason: 'Cognito Plus feature plan (advanced security/MFA) is off to avoid demo cost; enable for production / WWPS.',
+      },
+      {
+        id: 'AwsSolutions-CFR1',
+        reason: 'Geo restriction not needed for a personal demo; add for WWPS data-residency requirements.',
+      },
+      {
+        id: 'AwsSolutions-CFR2',
+        reason: 'AWS WAF is omitted to keep the demo at zero idle cost; attach a WebACL for production.',
+      },
+      {
+        id: 'AwsSolutions-CFR3',
+        reason: 'CloudFront access logging omitted for the demo; enable a log bucket for production audit.',
+      },
+      {
+        id: 'AwsSolutions-CFR4',
+        reason:
+          'Using the default CloudFront certificate (no custom domain) for the demo, which forces ' +
+          'TLSv1; a custom domain + ACM cert enforces TLSv1.2+ in production.',
+      },
+      {
+        id: 'AwsSolutions-S1',
+        reason: 'S3 server access logging omitted for the demo; enable a log bucket for production audit.',
+      },
+      {
+        id: 'AwsSolutions-APIG1',
+        reason: 'HTTP API access logging omitted for the demo; enable CloudWatch access logs for production audit.',
+      },
+      {
+        id: 'AwsSolutions-APIG4',
+        reason:
+          'The only unauthorized route is the intentional public GET /health uptime probe. All ' +
+          'application routes use the Cognito JWT authorizer by default.',
+      },
+      {
+        id: 'AwsSolutions-RDS10',
+        reason: 'Deletion protection is intentionally off so the demo can be cleanly destroyed; enable for production.',
+      },
+      {
+        id: 'AwsSolutions-L1',
+        reason: 'Pinned to nodejs20.x (current LTS at build time) rather than always-latest for reproducible demos.',
+      },
+    ])
   }
 }
