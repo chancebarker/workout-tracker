@@ -1,11 +1,10 @@
-const BASE_URL = '/api'
+import { config } from '../config'
+import { getIdToken } from '../auth/cognito'
 
-function getToken() {
-  return localStorage.getItem('token')
-}
+const BASE_URL = config.apiBase
 
 async function request(path, options = {}) {
-  const token = getToken()
+  const token = await getIdToken()
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,

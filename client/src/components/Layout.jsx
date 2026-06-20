@@ -9,11 +9,11 @@ function navClass({ isActive }) {
 }
 
 export default function Layout({ children }) {
-  const { logout } = useAuth()
+  const { signOut } = useAuth()
   const navigate = useNavigate()
 
   function handleLogout() {
-    logout()
+    signOut()
     navigate('/login')
   }
 

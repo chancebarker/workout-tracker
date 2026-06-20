@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { api } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
@@ -8,7 +7,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const { signIn } = useAuth()
   const navigate = useNavigate()
 
   async function handleSubmit(e) {
@@ -16,11 +15,10 @@ export default function Login() {
     setLoading(true)
     setError(null)
     try {
-      const { token } = await api.login({ email, password })
-      login(token)
+      await signIn({ email, password })
       navigate('/')
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Sign in failed')
     } finally {
       setLoading(false)
     }

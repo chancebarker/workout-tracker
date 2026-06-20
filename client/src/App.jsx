@@ -8,13 +8,19 @@ import WorkoutPage from './pages/WorkoutPage'
 import MetricsPage from './pages/MetricsPage'
 import ProgressPage from './pages/ProgressPage'
 
+function Loading() {
+  return <div className="min-h-full flex items-center justify-center text-muted">Loading…</div>
+}
+
 function PrivateRoute({ children }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, ready } = useAuth()
+  if (!ready) return <Loading />
   return isAuthenticated ? <Layout>{children}</Layout> : <Navigate to="/login" />
 }
 
 function PublicRoute({ children }) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, ready } = useAuth()
+  if (!ready) return <Loading />
   return isAuthenticated ? <Navigate to="/" /> : children
 }
 
