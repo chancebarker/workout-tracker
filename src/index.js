@@ -3,9 +3,8 @@ import 'dotenv/config'
 import './db/database.js'
 import authRoutes from './routes/auth.js'
 import exerciseRoutes from './routes/exercises.js'
-import repMaxRoutes from './routes/repmax.js'
-import programRoutes from './routes/programs.js'
-import sessionRoutes from './routes/sessions.js'
+import workoutRoutes from './routes/workouts.js'
+import metricRoutes from './routes/metrics.js'
 import progressRoutes from './routes/progress.js'
 
 const app = express()
@@ -15,9 +14,8 @@ app.use(express.json())
 
 app.use('/auth', authRoutes)
 app.use('/exercises', exerciseRoutes)
-app.use('/repmax', repMaxRoutes)
-app.use('/programs', programRoutes)
-app.use('/sessions', sessionRoutes)
+app.use('/workouts', workoutRoutes)
+app.use('/metrics', metricRoutes)
 app.use('/progress', progressRoutes)
 
 app.get('/health', (req, res) => {

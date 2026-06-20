@@ -7,98 +7,57 @@ export const schema = `
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
-  CREATE TABLE IF NOT EXISTS muscles (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL
-  );
-
   CREATE TABLE IF NOT EXISTS exercises (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    category TEXT CHECK(category IN ('barbell', 'dumbbell', 'bodyweight', 'cable', 'machine')) NOT NULL,
-    description TEXT,
-    instructions TEXT,
-    image_url TEXT,
-    created_by_user_id INTEGER REFERENCES users(id),
-    is_seeded INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-
-  CREATE TABLE IF NOT EXISTS exercise_muscles (
-    exercise_id INTEGER REFERENCES exercises(id),
-    muscle_id INTEGER REFERENCES muscles(id),
-    is_primary INTEGER DEFAULT 1,
-    PRIMARY KEY (exercise_id, muscle_id)
-  );
-
-  CREATE TABLE IF NOT EXISTS rep_max_records (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER REFERENCES users(id),
-    exercise_id INTEGER REFERENCES exercises(id),
-    estimated_one_rm REAL NOT NULL,
-    test_reps INTEGER,
-    test_weight REAL,
-    method TEXT CHECK(method IN ('actual', 'calculated')),
-    tested_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-
-  CREATE TABLE IF NOT EXISTS program_templates (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    description TEXT,
-    goal TEXT CHECK(goal IN ('general_fitness', 'weight_loss', 'strength', 'hypertrophy')),
-    duration_weeks INTEGER NOT NULL,
-    days_per_week INTEGER NOT NULL,
+    equipment TEXT NOT NULL,
+    primary_muscle TEXT NOT NULL,
+    is_compound INTEGER DEFAULT 0,
+    is_custom INTEGER DEFAULT 0,
+    created_by_user_id INTEGER REFERENCES users(id),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
-  CREATE TABLE IF NOT EXISTS program_days (
+  -- A workout is a single dated training session created by a user.
+  CREATE TABLE IF NOT EXISTS workouts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    program_template_id INTEGER REFERENCES program_templates(id),
-    week_number INTEGER NOT NULL,
-    day_number INTEGER NOT NULL,
-    name TEXT
-  );
-
-  CREATE TABLE IF NOT EXISTS program_exercises (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    program_day_id INTEGER REFERENCES program_days(id),
-    exercise_id INTEGER REFERENCES exercises(id),
-    sets INTEGER NOT NULL,
-    reps INTEGER NOT NULL,
-    intensity_percent REAL,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    date TEXT NOT NULL,
+    name TEXT,
     notes TEXT,
-    order_index INTEGER NOT NULL
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
-  CREATE TABLE IF NOT EXISTS user_programs (
+  -- An exercise placed into a workout (one row per exercise in a session).
+  CREATE TABLE IF NOT EXISTS workout_exercises (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER REFERENCES users(id),
-    program_template_id INTEGER REFERENCES program_templates(id),
-    started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    current_week INTEGER DEFAULT 1,
-    current_day INTEGER DEFAULT 1,
-    is_active INTEGER DEFAULT 1
+    workout_id INTEGER NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
+    exercise_id INTEGER NOT NULL REFERENCES exercises(id),
+    order_index INTEGER NOT NULL DEFAULT 0
   );
 
-  CREATE TABLE IF NOT EXISTS workout_sessions (
+  -- A single set logged against a workout_exercise.
+  CREATE TABLE IF NOT EXISTS sets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_program_id INTEGER REFERENCES user_programs(id),
-    program_day_id INTEGER REFERENCES program_days(id),
-    started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    completed_at DATETIME,
-    notes TEXT
-  );
-
-  CREATE TABLE IF NOT EXISTS logged_sets (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    workout_session_id INTEGER REFERENCES workout_sessions(id),
-    exercise_id INTEGER REFERENCES exercises(id),
+    workout_exercise_id INTEGER NOT NULL REFERENCES workout_exercises(id) ON DELETE CASCADE,
     set_number INTEGER NOT NULL,
-    planned_reps INTEGER,
-    actual_reps INTEGER,
-    planned_weight REAL,
-    actual_weight REAL,
-    completed_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    weight REAL,
+    reps INTEGER,
+    rpe INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  -- Optional, user-defined daily fitness markers (bodyweight, steps, sleep, etc.).
+  -- metric_type is free-form so any marker a user cares about fits without a schema change.
+  CREATE TABLE IF NOT EXISTS daily_metrics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    date TEXT NOT NULL,
+    metric_type TEXT NOT NULL,
+    value REAL NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_workouts_user_date ON workouts(user_id, date);
+  CREATE INDEX IF NOT EXISTS idx_daily_metrics_user_type ON daily_metrics(user_id, metric_type, date);
 `

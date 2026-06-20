@@ -19,7 +19,7 @@ export default function Register() {
     try {
       const { token } = await api.register({ name, email, password })
       login(token)
-      navigate('/dashboard')
+      navigate('/')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -28,28 +28,47 @@ export default function Register() {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: '100px auto', padding: '0 20px' }}>
-      <h1>Workout Tracker</h1>
-      <h2>Create Account</h2>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 12 }}>
-          <label>Name</label><br />
-          <input type="text" value={name} onChange={e => setName(e.target.value)} required style={{ width: '100%', padding: 8 }} />
-        </div>
-        <div style={{ marginBottom: 12 }}>
-          <label>Email</label><br />
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} required style={{ width: '100%', padding: 8 }} />
-        </div>
-        <div style={{ marginBottom: 12 }}>
-          <label>Password</label><br />
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} required style={{ width: '100%', padding: 8 }} />
-        </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" disabled={loading} style={{ width: '100%', padding: 10 }}>
-          {loading ? 'Creating account...' : 'Register'}
-        </button>
-      </form>
-      <p>Already have an account? <Link to="/login">Login</Link></p>
+    <div className="min-h-full flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        <h1 className="text-3xl font-bold text-white text-center mb-1">🏋️ Tracker</h1>
+        <p className="text-muted text-center mb-8">Create your training log</p>
+
+        <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-xl p-6 space-y-4">
+          <div>
+            <label className="block text-sm text-muted mb-1">Name</label>
+            <input
+              type="text" value={name} onChange={e => setName(e.target.value)} required
+              className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-border text-white focus:outline-none focus:border-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-muted mb-1">Email</label>
+            <input
+              type="email" value={email} onChange={e => setEmail(e.target.value)} required
+              className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-border text-white focus:outline-none focus:border-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-muted mb-1">Password</label>
+            <input
+              type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8}
+              className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-border text-white focus:outline-none focus:border-accent"
+            />
+            <p className="text-xs text-muted mt-1">At least 8 characters</p>
+          </div>
+          {error && <p className="text-danger text-sm">{error}</p>}
+          <button
+            type="submit" disabled={loading}
+            className="w-full py-2 rounded-lg bg-accent hover:bg-accent-hover text-white font-medium transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Creating account…' : 'Create account'}
+          </button>
+        </form>
+
+        <p className="text-center text-muted text-sm mt-4">
+          Already have an account? <Link to="/login" className="text-accent hover:underline">Log in</Link>
+        </p>
+      </div>
     </div>
   )
 }
