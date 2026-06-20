@@ -61,13 +61,21 @@ router.get('/', (req, res) => {
 
   const workouts = db.prepare(query).all(...params)
 
-  // Attach a quick exercise count per workout for calendar/list previews
-  const withCounts = workouts.map(w => {
-    const { count } = db.prepare(
-      'SELECT COUNT(*) as count FROM workout_exercises WHERE workout_id = ?'
-    ).get(w.id)
-    return { ...w, exercise_count: count }
-  })
+  // Attach exercise + set counts per workout for calendar/list previews
+  const exerciseCount = db.prepare(
+    'SELECT COUNT(*) as count FROM workout_exercises WHERE workout_id = ?'
+  )
+  const setCount = db.prepare(`
+    SELECT COUNT(*) as count FROM sets s
+    JOIN workout_exercises we ON s.workout_exercise_id = we.id
+    WHERE we.workout_id = ?
+  `)
+
+  const withCounts = workouts.map(w => ({
+    ...w,
+    exercise_count: exerciseCount.get(w.id).count,
+    set_count: setCount.get(w.id).count
+  }))
 
   res.json(withCounts)
 })
@@ -98,6 +106,44 @@ router.get('/:id', (req, res) => {
   }))
 
   res.json({ ...workout, exercises: exercisesWithSets })
+})
+
+// For each exercise in this workout, find the most recent EARLIER workout that
+// also contained that exercise, and return its sets. Powers the "last time"
+// reference shown next to each exercise. Returns { [exercise_id]: { date, sets } }.
+router.get('/:id/previous', (req, res) => {
+  const workout = getOwnedWorkout(req.params.id, req.user.user_id)
+  if (!workout) return res.status(404).json({ error: 'Workout not found' })
+
+  const exerciseIds = db.prepare(
+    'SELECT DISTINCT exercise_id FROM workout_exercises WHERE workout_id = ?'
+  ).all(workout.id).map(r => r.exercise_id)
+
+  // Most recent prior workout_exercise for this user + exercise, strictly before
+  // this workout (earlier date, or same date but a lower id).
+  const priorStmt = db.prepare(`
+    SELECT we.id, w.date
+    FROM workout_exercises we
+    JOIN workouts w ON we.workout_id = w.id
+    WHERE w.user_id = ? AND we.exercise_id = ?
+      AND (w.date < ? OR (w.date = ? AND w.id < ?))
+    ORDER BY w.date DESC, w.id DESC
+    LIMIT 1
+  `)
+  const setStmt = db.prepare(`
+    SELECT set_number, weight, reps, rpe FROM sets
+    WHERE workout_exercise_id = ? ORDER BY set_number
+  `)
+
+  const result = {}
+  for (const exerciseId of exerciseIds) {
+    const prior = priorStmt.get(req.user.user_id, exerciseId, workout.date, workout.date, workout.id)
+    if (prior) {
+      result[exerciseId] = { date: prior.date, sets: setStmt.all(prior.id) }
+    }
+  }
+
+  res.json(result)
 })
 
 const updateWorkoutSchema = z.object({

@@ -14,12 +14,19 @@ export default function WorkoutPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [workout, setWorkout] = useState(null)
+  const [previous, setPrevious] = useState({})
+  const [saveState, setSaveState] = useState('idle') // idle | saving | saved
   const [error, setError] = useState(null)
   const [pickerOpen, setPickerOpen] = useState(false)
 
   async function load() {
     try {
-      setWorkout(await api.getWorkout(id))
+      const [w, prev] = await Promise.all([
+        api.getWorkout(id),
+        api.getWorkoutPrevious(id)
+      ])
+      setWorkout(w)
+      setPrevious(prev)
     } catch (err) {
       setError(err.message)
     }
@@ -41,14 +48,17 @@ export default function WorkoutPage() {
   async function saveSet(weId, setId) {
     const ex = workout.exercises.find(e => e.id === weId)
     const set = ex.sets.find(s => s.id === setId)
+    setSaveState('saving')
     try {
       await api.updateSet(id, weId, setId, {
         weight: num(set.weight),
         reps: num(set.reps, true),
         rpe: num(set.rpe, true)
       })
+      setSaveState('saved')
     } catch (err) {
       setError(err.message)
+      setSaveState('idle')
     }
   }
 
@@ -90,10 +100,23 @@ export default function WorkoutPage() {
       const added = await api.addExercise(id, exerciseId)
       setWorkout(w => ({ ...w, exercises: [...w.exercises, added] }))
       setPickerOpen(false)
+      // refresh "last time" so the newly added exercise shows its history
+      setPrevious(await api.getWorkoutPrevious(id))
     } catch (err) {
       setError(err.message)
       setPickerOpen(false)
     }
+  }
+
+  // "135 × 8, 135 × 8, 135 × 7" for an exercise's previous performance
+  function formatPrevious(exerciseId) {
+    const prev = previous[exerciseId]
+    if (!prev || prev.sets.length === 0) return null
+    const parts = prev.sets.map(s => {
+      const w = s.weight != null ? `${s.weight}` : 'BW'
+      return `${w} × ${s.reps ?? '—'}`
+    })
+    return { date: prev.date, summary: parts.join(', ') }
   }
 
   async function saveName(name) {
@@ -136,15 +159,24 @@ export default function WorkoutPage() {
       {error && <p className="text-danger text-sm mb-3">{error}</p>}
 
       <div className="space-y-4">
-        {workout.exercises.map(ex => (
+        {workout.exercises.map(ex => {
+          const prev = formatPrevious(ex.id)
+          return (
           <div key={ex.id} className="bg-surface border border-border rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <div>
                 <div className="font-semibold text-white">{ex.name}</div>
                 <div className="text-xs text-muted">{ex.primary_muscle} · {ex.equipment}</div>
               </div>
               <button onClick={() => removeExercise(ex.id)} className="text-muted hover:text-danger text-sm">Remove</button>
             </div>
+
+            {prev && (
+              <div className="text-xs mb-3 px-2 py-1.5 rounded-lg bg-surface-2/60">
+                <span className="text-muted">Last time ({prev.date}):</span>{' '}
+                <span className="text-slate-300">{prev.summary}</span>
+              </div>
+            )}
 
             <div className="grid grid-cols-[2rem_1fr_1fr_1fr_2rem] gap-2 items-center text-xs text-muted mb-1">
               <span>Set</span><span>Weight</span><span>Reps</span><span>RPE</span><span></span>
@@ -185,7 +217,8 @@ export default function WorkoutPage() {
               + Add set
             </button>
           </div>
-        ))}
+          )
+        })}
       </div>
 
       <button
@@ -194,6 +227,22 @@ export default function WorkoutPage() {
       >
         + Add exercise
       </button>
+
+      <div className="mt-6 flex items-center justify-between gap-3">
+        <span className="text-xs text-muted">
+          {saveState === 'saving'
+            ? 'Saving…'
+            : saveState === 'saved'
+              ? '✓ All changes saved'
+              : 'Changes save automatically as you type'}
+        </span>
+        <button
+          onClick={() => navigate('/')}
+          className="px-5 py-2.5 rounded-xl bg-success hover:brightness-110 text-white font-medium transition"
+        >
+          Finish workout
+        </button>
+      </div>
 
       {pickerOpen && (
         <ExercisePicker onSelect={handlePick} onClose={() => setPickerOpen(false)} />

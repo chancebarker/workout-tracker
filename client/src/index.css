@@ -75,8 +75,14 @@ body {
   background: var(--color-accent);
   color: white;
 }
+/* All in-month days share one readable color (override default red weekends) */
+.react-calendar__month-view__days__day,
+.react-calendar__month-view__days__day--weekend {
+  color: #e2e8f0;
+}
+/* Days from the previous/next month: dimmed but still legible */
 .react-calendar__month-view__days__day--neighboringMonth {
-  color: #475569;
+  color: #64748b;
 }
 /* green dot marker for days that have a workout */
 .has-workout::after {

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Calendar from 'react-calendar'
-import 'react-calendar/dist/Calendar.css'
 import { api } from '../api/client'
 import { toYMD } from '../utils/date'
 
@@ -91,6 +90,7 @@ export default function CalendarPage() {
                   <div className="font-medium text-white">{w.name || 'Workout'}</div>
                   <div className="text-sm text-muted">
                     {w.exercise_count} {w.exercise_count === 1 ? 'exercise' : 'exercises'}
+                    {w.set_count > 0 && ` · ${w.set_count} ${w.set_count === 1 ? 'set' : 'sets'}`}
                   </div>
                 </button>
               ))}

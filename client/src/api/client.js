@@ -47,6 +47,7 @@ export const api = {
     return request(`/workouts${query ? '?' + query : ''}`)
   },
   getWorkout: (id) => request(`/workouts/${id}`),
+  getWorkoutPrevious: (id) => request(`/workouts/${id}/previous`),
   createWorkout: (body) => request('/workouts', { method: 'POST', body: JSON.stringify(body) }),
   updateWorkout: (id, body) => request(`/workouts/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   deleteWorkout: (id) => request(`/workouts/${id}`, { method: 'DELETE' }),

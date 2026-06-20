@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { api } from '../api/client'
 
@@ -18,6 +18,7 @@ export default function ProgressPage() {
   const [selected, setSelected] = useState('')
   const [series, setSeries] = useState([])
   const [error, setError] = useState(null)
+  const chartRef = useRef(null)
 
   useEffect(() => {
     async function load() {
@@ -42,6 +43,12 @@ export default function ProgressPage() {
     }
   }
 
+  // From the PR table: select the exercise and scroll up to its chart
+  async function showExercise(exerciseId) {
+    await loadSeries(String(exerciseId))
+    chartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-white mb-4">Progress</h1>
@@ -55,7 +62,7 @@ export default function ProgressPage() {
         </div>
       )}
 
-      <div className="mb-6">
+      <div className="mb-6" ref={chartRef}>
         <label className="block text-sm text-muted mb-1">Exercise progression (heaviest set per day)</label>
         <select
           value={selected}
@@ -85,7 +92,8 @@ export default function ProgressPage() {
       </div>
 
       <div>
-        <h2 className="font-semibold text-white mb-2">Personal records</h2>
+        <h2 className="font-semibold text-white mb-1">Personal records</h2>
+        {prs.length > 0 && <p className="text-xs text-muted mb-2">Tap a row to see its progression.</p>}
         {prs.length === 0 ? (
           <p className="text-muted text-sm">Log some sets to start tracking PRs.</p>
         ) : (
@@ -100,7 +108,11 @@ export default function ProgressPage() {
               </thead>
               <tbody>
                 {prs.map(pr => (
-                  <tr key={pr.exercise_id} className="border-b border-border/50 last:border-0">
+                  <tr
+                    key={pr.exercise_id}
+                    onClick={() => showExercise(pr.exercise_id)}
+                    className="border-b border-border/50 last:border-0 cursor-pointer hover:bg-surface-2 transition-colors"
+                  >
                     <td className="px-4 py-2 text-white">{pr.exercise_name}</td>
                     <td className="px-4 py-2 text-muted">{pr.primary_muscle}</td>
                     <td className="px-4 py-2 text-right text-white">{pr.best_weight} lbs</td>

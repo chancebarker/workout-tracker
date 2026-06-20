@@ -73,15 +73,31 @@ export default function MetricsPage() {
           <div>
             <label className="block text-sm text-muted mb-1">Metric</label>
             <input
-              list="metric-types" placeholder="bodyweight, sleep, steps…"
+              placeholder="Type a metric name…"
               value={form.metric_type}
               onChange={e => setForm({ ...form, metric_type: e.target.value })}
               required
               className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-border text-white text-sm focus:outline-none focus:border-accent"
             />
-            <datalist id="metric-types">
-              {allTypeOptions.map(t => <option key={t} value={t} />)}
-            </datalist>
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {allTypeOptions.map(t => {
+                const active = form.metric_type === t
+                return (
+                  <button
+                    type="button" key={t}
+                    onClick={() => setForm({ ...form, metric_type: t })}
+                    className={[
+                      'px-2.5 py-1 rounded-full text-xs border transition-colors',
+                      active
+                        ? 'bg-accent border-accent text-white'
+                        : 'border-border text-muted hover:text-white hover:border-accent'
+                    ].join(' ')}
+                  >
+                    {t}
+                  </button>
+                )
+              })}
+            </div>
           </div>
           <div>
             <label className="block text-sm text-muted mb-1">Value</label>
