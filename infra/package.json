@@ -11,9 +11,11 @@
     "destroy": "cdk destroy",
     "diff": "cdk diff",
     "test": "jest",
-    "nag": "cdk synth -c nag=true"
+    "nag": "cdk synth -c nag=true",
+    "db:init": "node scripts/db-init.mjs"
   },
   "devDependencies": {
+    "@aws-sdk/client-rds-data": "^3.658.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.0",
     "aws-cdk": "^2.1128.0",

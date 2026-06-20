@@ -64,6 +64,11 @@ export class WorkoutTrackerStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'UserPoolId', { value: auth.userPool.userPoolId })
     new cdk.CfnOutput(this, 'UserPoolClientId', { value: auth.userPoolClient.userPoolClientId })
     new cdk.CfnOutput(this, 'SiteBucketName', { value: frontend.bucketName })
+    // For scripts/db-init.mjs (apply schema + seed exercises via the Data API):
+    new cdk.CfnOutput(this, 'ClusterArn', { value: data.cluster.clusterArn })
+    new cdk.CfnOutput(this, 'SecretArn', { value: data.secret.secretArn })
+    new cdk.CfnOutput(this, 'DbName', { value: data.databaseName })
+    new cdk.CfnOutput(this, 'AwsRegion', { value: cdk.Stack.of(this).region })
 
     // ---- cdk-nag: intentional demo trade-offs, each with a justification ----
     // These are the *documented* gaps between the cheap demo and a production build.
