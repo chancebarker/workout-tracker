@@ -57,8 +57,10 @@ app.post('/exercises', h(async (req, res) => {
 }))
 
 /* --------------------------------- workouts -------------------------------- */
+// Route params arrive as strings; integer columns need numeric params or Postgres
+// throws "operator does not exist: integer = text". Coerce all id params with Number().
 async function ownedWorkout(id, userSub) {
-  const [w] = await query('SELECT * FROM workouts WHERE id = :id AND user_sub = :sub', { id, sub: userSub })
+  const [w] = await query('SELECT * FROM workouts WHERE id = :id AND user_sub = :sub', { id: Number(id), sub: userSub })
   return w
 }
 async function ownedWE(workoutId, weId, userSub) {
@@ -66,7 +68,7 @@ async function ownedWE(workoutId, weId, userSub) {
     `SELECT we.* FROM workout_exercises we
      JOIN workouts w ON we.workout_id = w.id
      WHERE we.id = :weId AND we.workout_id = :workoutId AND w.user_sub = :sub`,
-    { weId, workoutId, sub: userSub }
+    { weId: Number(weId), workoutId: Number(workoutId), sub: userSub }
   )
   return we
 }
@@ -176,7 +178,7 @@ app.delete('/workouts/:id', h(async (req, res) => {
 app.post('/workouts/:id/exercises', h(async (req, res) => {
   const workout = await ownedWorkout(req.params.id, sub())
   if (!workout) return res.status(404).json({ error: 'Workout not found' })
-  const exerciseId = req.body?.exercise_id
+  const exerciseId = Number(req.body?.exercise_id)
   const [exercise] = await query('SELECT * FROM exercises WHERE id = :id', { id: exerciseId })
   if (!exercise) return res.status(404).json({ error: 'Exercise not found' })
 
@@ -214,7 +216,7 @@ app.post('/workouts/:id/exercises/:weId/sets', h(async (req, res) => {
 app.patch('/workouts/:id/exercises/:weId/sets/:setId', h(async (req, res) => {
   const we = await ownedWE(req.params.id, req.params.weId, sub())
   if (!we) return res.status(404).json({ error: 'Not found' })
-  const [set] = await query('SELECT * FROM sets WHERE id = :id AND workout_exercise_id = :we', { id: req.params.setId, we: we.id })
+  const [set] = await query('SELECT * FROM sets WHERE id = :id AND workout_exercise_id = :we', { id: Number(req.params.setId), we: we.id })
   if (!set) return res.status(404).json({ error: 'Set not found' })
 
   const rpe = req.body?.rpe
@@ -234,7 +236,7 @@ app.patch('/workouts/:id/exercises/:weId/sets/:setId', h(async (req, res) => {
 app.delete('/workouts/:id/exercises/:weId/sets/:setId', h(async (req, res) => {
   const we = await ownedWE(req.params.id, req.params.weId, sub())
   if (!we) return res.status(404).json({ error: 'Not found' })
-  await query('DELETE FROM sets WHERE id = :id AND workout_exercise_id = :we', { id: req.params.setId, we: we.id })
+  await query('DELETE FROM sets WHERE id = :id AND workout_exercise_id = :we', { id: Number(req.params.setId), we: we.id })
   res.status(204).end()
 }))
 
@@ -276,7 +278,7 @@ app.get('/metrics', h(async (req, res) => {
 }))
 
 app.delete('/metrics/:id', h(async (req, res) => {
-  const rows = await query('DELETE FROM daily_metrics WHERE id = :id AND user_sub = :sub RETURNING id', { id: req.params.id, sub: sub() })
+  const rows = await query('DELETE FROM daily_metrics WHERE id = :id AND user_sub = :sub RETURNING id', { id: Number(req.params.id), sub: sub() })
   if (rows.length === 0) return res.status(404).json({ error: 'Metric not found' })
   res.status(204).end()
 }))
@@ -296,7 +298,7 @@ app.get('/progress/summary', h(async (_req, res) => {
 }))
 
 app.get('/progress/exercise/:exerciseId', h(async (req, res) => {
-  const [exercise] = await query('SELECT id, name FROM exercises WHERE id = :id', { id: req.params.exerciseId })
+  const [exercise] = await query('SELECT id, name FROM exercises WHERE id = :id', { id: Number(req.params.exerciseId) })
   if (!exercise) return res.status(404).json({ error: 'Exercise not found' })
   const data_points = await query(
     `SELECT to_char(w.date, 'YYYY-MM-DD') AS date,
@@ -308,7 +310,7 @@ app.get('/progress/exercise/:exerciseId', h(async (req, res) => {
      JOIN workouts w ON we.workout_id = w.id
      WHERE w.user_sub = :sub AND we.exercise_id = :ex
      GROUP BY w.date ORDER BY w.date ASC`,
-    { sub: sub(), ex: req.params.exerciseId })
+    { sub: sub(), ex: Number(req.params.exerciseId) })
   res.json({ exercise_id: exercise.id, exercise_name: exercise.name, data_points })
 }))
 
