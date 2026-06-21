@@ -48,7 +48,10 @@ async function exec(sql, parameters = [], format) {
 async function main() {
   console.log('Applying schema…')
   const schema = readFileSync(join(__dirname, '..', 'lambda', 'api', 'schema.sql'), 'utf8')
-  const statements = schema.split(';').map((s) => s.trim()).filter(Boolean)
+  // Strip `-- ...` line comments first; some contain semicolons that would otherwise
+  // break a naive split. (Safe here: the schema has no string literals with -- or ;.)
+  const cleaned = schema.replace(/--[^\n]*/g, '')
+  const statements = cleaned.split(';').map((s) => s.trim()).filter(Boolean)
   for (const st of statements) await exec(st)
   console.log(`  ${statements.length} statements applied.`)
 

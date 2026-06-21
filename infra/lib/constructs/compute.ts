@@ -53,7 +53,15 @@ export class Compute extends Construct {
         USER_POOL_CLIENT_ID: props.userPoolClient.userPoolClientId,
         NODE_OPTIONS: '--enable-source-maps',
       },
-      bundling: { format: cdk.aws_lambda_nodejs.OutputFormat.ESM, minify: true, sourceMap: true },
+      bundling: {
+        format: cdk.aws_lambda_nodejs.OutputFormat.ESM,
+        minify: true,
+        sourceMap: true,
+        // express / serverless-express are CommonJS and use require() internally. esbuild's
+        // ESM output doesn't define require, so re-create it from the module URL. Without
+        // this you get "Dynamic require of 'util' is not supported" at cold start.
+        banner: "import { createRequire as topLevelCreateRequire } from 'module'; const require = topLevelCreateRequire(import.meta.url);",
+      },
     })
 
     // --- Least-privilege grants (scoped to THIS cluster + THIS secret) ---

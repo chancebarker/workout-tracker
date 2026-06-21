@@ -1,5 +1,7 @@
 node_modules/
 cdk.out/
+cdk-outputs.json
+*.log
 *.js
 *.d.ts
 !jest.config.js
