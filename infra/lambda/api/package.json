@@ -1,0 +1,11 @@
+{
+  "name": "workout-tracker-api-lambda",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Express API adapted to Lambda via serverless-express; Postgres via the RDS Data API.",
+  "dependencies": {
+    "@aws-sdk/client-rds-data": "^3.658.0",
+    "@codegenie/serverless-express": "^4.16.0",
+    "express": "^4.21.0"
+  }
+}

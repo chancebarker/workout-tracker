@@ -1,22 +1,42 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import * as cognito from '../auth/cognito'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('token'))
+  const [email, setEmail] = useState(null)
+  const [ready, setReady] = useState(false)
 
-  function login(newToken) {
-    localStorage.setItem('token', newToken)
-    setToken(newToken)
+  // On load, see if there's already a valid Cognito session.
+  useEffect(() => {
+    cognito.getIdToken().then((token) => {
+      if (token) setEmail(cognito.currentEmail())
+      setReady(true)
+    })
+  }, [])
+
+  async function signIn(creds) {
+    await cognito.signIn(creds)
+    setEmail(creds.email)
   }
 
-  function logout() {
-    localStorage.removeItem('token')
-    setToken(null)
+  async function signUp(info) {
+    await cognito.signUp(info)
+  }
+
+  async function confirm(info) {
+    await cognito.confirm(info)
+  }
+
+  function signOut() {
+    cognito.signOut()
+    setEmail(null)
   }
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider
+      value={{ email, ready, isAuthenticated: !!email, signIn, signUp, confirm, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   )
