@@ -19,16 +19,11 @@ and Infrastructure-as-Code with AWS CDK (TypeScript).
 6. **[INTERVIEW-PREP.md](./INTERVIEW-PREP.md)** — crisp, defensible answers to the
    questions this design invites.
 
-## Fluency & operations kit
+## Operations
 
-- **[TECH-STACK.md](./TECH-STACK.md)** — every technology, what it is + why.
-- **[SERVICE-MAPPING.md](./SERVICE-MAPPING.md)** — local → AWS service, alternatives, why.
-- **[REQUEST-LIFECYCLE.md](./REQUEST-LIFECYCLE.md)** — one request traced through every service.
-- **[WAR-STORIES.md](./WAR-STORIES.md)** — what broke at deploy time and how it was fixed.
-- **[GLOSSARY.md](./GLOSSARY.md)** — terms & acronyms for fast recall.
-- **[BEHAVIORAL-STAR.md](./BEHAVIORAL-STAR.md)** — STAR stories for the consulting questions.
-- **[OPERATIONS-RUNBOOK.md](./OPERATIONS-RUNBOOK.md)** — run it for friends/family: user
-  admin, troubleshooting, cost, deploy/rollback, SSO roadmap.
+- **[OPERATIONS-RUNBOOK.md](./OPERATIONS-RUNBOOK.md)** — run and maintain the live app:
+  Cognito user admin, troubleshooting, cost management, deploy/rollback, and the
+  email-reliability + SSO/federation roadmap.
 
 ## One-line thesis
 
