@@ -19,6 +19,12 @@ and Infrastructure-as-Code with AWS CDK (TypeScript).
 6. **[INTERVIEW-PREP.md](./INTERVIEW-PREP.md)** — crisp, defensible answers to the
    questions this design invites.
 
+## Operations
+
+- **[OPERATIONS-RUNBOOK.md](./OPERATIONS-RUNBOOK.md)** — run and maintain the live app:
+  Cognito user admin, troubleshooting, cost management, deploy/rollback, and the
+  email-reliability + SSO/federation roadmap.
+
 ## One-line thesis
 
 > Low, spiky, relational workload → **serverless refactor** (S3+CloudFront, Cognito,
