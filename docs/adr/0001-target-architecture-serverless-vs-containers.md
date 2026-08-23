@@ -2,15 +2,14 @@
 
 - **Status:** Proposed (awaiting review)
 - **Date:** 2026-06-20
-- **Deciders:** App owner (migration lead) + acting AWS Solutions Architect
+- **Deciders:** App owner
 - **Context tags:** migration, 6 R's, cost optimization, Well-Architected
 
 ## Context
 
 The Workout Tracker runs today on a single local host: a React SPA, a Node.js/Express
-REST API, and an embedded SQLite database. We are migrating it to AWS as a
-portfolio/discussion artifact that must be **defensible like consulting advice to a
-customer**, not merely functional.
+REST API, and an embedded SQLite database. We are migrating it to AWS following a
+rigorous, defensible design process, not just picking a stack ad hoc.
 
 The workload has three defining characteristics:
 
@@ -53,7 +52,7 @@ CDK project so the trade-off is demonstrable.
   around fixed access patterns and break the ad-hoc aggregation the progress features need.
 - **Security:** no public-facing compute; Cognito replaces custom auth; smaller attack
   surface.
-- **Portfolio signal:** the strongest cloud-native narrative for a ProServe discussion,
+- **Cloud-native fit:** the most idiomatic serverless architecture for this workload,
   while still being able to articulate when containers win.
 
 ## Consequences

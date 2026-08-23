@@ -5,8 +5,8 @@
 > assessment (Step 1) and the migration strategy with two candidate target
 > architectures and an explicit trade-off analysis (Step 2). The chosen target is
 > recorded in [ADR-0001](./adr/0001-target-architecture-serverless-vs-containers.md);
-> migration mechanics, CDK implementation, public-sector hardening, and interview prep
-> follow in separate documents once this design is approved.
+> migration mechanics, CDK implementation, and public-sector hardening follow in separate
+> documents once this design is approved.
 
 > **Accuracy notes (current build, not a template):**
 > - The API is **Node.js / Express**, so the serverless target wraps the existing app
@@ -124,8 +124,8 @@ erDiagram
 | Data volume | Tiny (KB–MB) | One-shot migration; no need for heavy replication tooling |
 | Binary assets | None today | No S3 object pipeline / DataSync needed yet |
 | Auth | Custom JWT + bcrypt | Replace with Cognito (managed, MFA-capable) — counts as refactor effort |
-| Availability need | Demo / portfolio; not yet mission-critical | Single-AZ acceptable for demo; document the Multi-AZ upgrade path |
-| Compliance | None for the personal app | But WWPS framing requires a documented hardening path (see hardening note) |
+| Availability need | Personal project; not yet mission-critical | Single-AZ acceptable for now; document the Multi-AZ upgrade path |
+| Compliance | None for the personal app | But a public-sector deployment requires a documented hardening path (see hardening note) |
 | Build artifacts | SPA compiles to static files | Natural fit for S3 + CloudFront (no server needed for frontend) |
 
 ---
@@ -143,7 +143,7 @@ erDiagram
 | **Replatform** ("lift, tinker & optimize") | ✓ Candidate | Containerize the Express API onto **ECS Fargate** + managed **RDS PostgreSQL** behind an **ALB**. Minimal code change, gains managed data + autoscaling. → **Target B.** |
 | **Refactor / Re-architect** | ✓ Candidate | Re-architect to managed/serverless: **S3+CloudFront**, **Cognito**, **API Gateway → Lambda** (Express via serverless-express), **Aurora Serverless v2**. Most cloud-native, lowest idle cost, most managed. → **Target A.** |
 
-**Framing for the interview:** Rehost is the baseline; the real decision is **Replatform
+**Bottom line:** Rehost is the baseline; the real decision is **Replatform
 vs Refactor**, and the right answer is workload-driven, not fashion-driven.
 
 ### 2.2 Target A — Serverless (Refactor)
@@ -218,7 +218,7 @@ flowchart TB
 | **Data-model fit** | ⭐ Postgres keeps schema intact | ⭐ Postgres keeps schema intact (tie) |
 | **Security posture** | ⭐ No public compute; managed auth; smaller attack surface | Strong, but more to secure (SGs, NAT, container supply chain) |
 | **Time-to-deliver** | Fast once adapter + authorizer wired | Moderate (Dockerfile + VPC + ECS plumbing) |
-| **Cloud-native signal** | ⭐ Highest — strongest portfolio story | Solid, more "traditional" |
+| **Cloud-native fit** | ⭐ Highest — most idiomatic serverless architecture | Solid, more "traditional" |
 
 ### 2.5 Rough monthly cost (us-east-1, personal scale)
 
@@ -279,8 +279,7 @@ only if the API became latency-sensitive for a primarily-western user base.
 
 **Adopt Target A (Serverless / Refactor).** It wins decisively on the two dimensions that
 matter most for this workload and goal — **idle cost** and **operational burden** — while
-preserving the relational data model and telling the strongest cloud-native story for a
-ProServe conversation. Target B remains the right call for steady high-throughput
+preserving the relational data model. Target B remains the right call for steady high-throughput
 workloads or when a team needs runtime portability/container parity; it will be **stubbed
 and documented** in the CDK project so the trade-off is demonstrable, not just asserted.
 
@@ -288,5 +287,5 @@ Decision recorded in **[ADR-0001](./adr/0001-target-architecture-serverless-vs-c
 
 ---
 
-> **⏸ PAUSE FOR REVIEW.** Steps 3–6 (migration runbook, CDK implementation, public-sector
-> hardening, interview-prep doc) proceed after sign-off on this design.
+> **⏸ PAUSE FOR REVIEW.** Steps 3–5 (migration runbook, CDK implementation, public-sector
+> hardening) proceed after sign-off on this design.

@@ -115,7 +115,7 @@ CLUSTER_ARN=<...> SECRET_ARN=<...> DB_NAME=workout npm run db:init
   stack stuck in `ROLLBACK_COMPLETE` (failed *first* create) must be deleted before
   redeploying: `aws cloudformation delete-stack --stack-name WorkoutTrackerStack`.
 
-## Roadmap: email reliability & auth evolution (good interview discussion)
+## Roadmap: email reliability & auth evolution
 
 - **Reliable email:** move Cognito from its default sender to **Amazon SES** (verified
   domain, request production access out of the SES sandbox) for branded, deliverable

@@ -37,7 +37,7 @@ export class Auth extends Construct {
         requireSymbols: true,
       },
       // Advanced security adds risk-based MFA/anomaly detection (small cost). Enable for
-      // anything resembling production, especially WWPS.
+      // anything resembling production.
       // featurePlan: cognito.FeaturePlan.PLUS,
       removalPolicy: cdk.RemovalPolicy.DESTROY, // demo: tear down with the stack
     })

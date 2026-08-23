@@ -66,7 +66,6 @@ npm run nag         # cdk synth with cdk-nag (AWS Solutions ruleset)
   esbuild/Docker is needed.
 - **`npm run nag`** runs **cdk-nag**. Intentional demo gaps are captured as **documented
   suppressions** in `lib/workout-tracker-stack.ts` — each one names the production fix.
-  This is the "how do you test/secure infrastructure?" interview answer.
 
 ## 💸 Cost warning — READ THIS
 
@@ -98,7 +97,7 @@ tier — intentionally off here for clean teardown.)
 | Custom domain + ACM cert | Route 53 + ACM on CloudFront |
 | AWS WAF WebACL | Attach managed rule groups (SQLi, rate limit, etc.) |
 | Aurora min capacity > 0 / provisioned concurrency | Remove cold starts at a cost |
-| Multi-AZ / Aurora Global | HA and/or multi-region (see INTERVIEW-PREP.md) |
+| Multi-AZ / Aurora Global | HA and/or multi-region |
 | Cognito user-migration trigger | Migrate existing bcrypt users on first sign-in |
 | cdk-nag / assertion tests | ✅ **included** — `npm test` + `npm run nag` (wire into CI) |
 

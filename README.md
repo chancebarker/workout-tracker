@@ -1,6 +1,6 @@
 # Workout Tracker
 
-A full-stack workout tracker — and a hands-on **on-prem → AWS cloud migration** case study.
+A full-stack workout tracker, and an **on-prem → AWS cloud migration** exercise.
 Built locally on a conventional stack, then re-architected and deployed to AWS as a
 serverless application defined entirely in Infrastructure-as-Code.
 
@@ -76,5 +76,5 @@ Cognito outputs → `cdk deploy` again. Tear down anytime with `cdk destroy`.
 ## Documentation
 
 Design and operations docs live in [`docs/`](./docs/) — architecture, the decision record,
-the migration runbook, a public-sector (WWPS) hardening note, and an operations runbook for
+the migration runbook, a public-sector hardening note, and an operations runbook for
 running it day-to-day.

@@ -1,7 +1,7 @@
-# Workout Tracker — Cloud Migration Portfolio
+# Workout Tracker — Cloud Migration Docs
 
-A locally-hosted full-stack app (React SPA + Node/Express + SQLite) migrated to AWS as a
-defensible, consultant-style case study: system design, the 6 R's, AWS service selection,
+A locally-hosted full-stack app (React SPA + Node/Express + SQLite) migrated to AWS with a
+rigorous, defensible design process: system design, the 6 R's, AWS service selection,
 and Infrastructure-as-Code with AWS CDK (TypeScript).
 
 ## Read in this order
@@ -15,9 +15,7 @@ and Infrastructure-as-Code with AWS CDK (TypeScript).
    with dual-run/rollback (DMS / DataSync / MGN where they apply).
 4. **[../infra/](../infra/)** — the CDK project. Target A fully built; Target B stubbed.
 5. **[PUBLIC-SECTOR-HARDENING.md](./PUBLIC-SECTOR-HARDENING.md)** — how the design changes
-   for a regulated WWPS/government customer.
-6. **[INTERVIEW-PREP.md](./INTERVIEW-PREP.md)** — crisp, defensible answers to the
-   questions this design invites.
+   for a regulated public-sector/government deployment.
 
 ## Operations
 
@@ -29,5 +27,5 @@ and Infrastructure-as-Code with AWS CDK (TypeScript).
 
 > Low, spiky, relational workload → **serverless refactor** (S3+CloudFront, Cognito,
 > API Gateway→Lambda, Aurora Serverless v2 scaled to zero): ~10× cheaper at idle than
-> containers, keeps the relational model, lowest ops burden — and I can defend exactly
-> when I'd choose containers instead.
+> containers, keeps the relational model, lowest ops burden — with a documented path
+> to containers if the workload profile changes.

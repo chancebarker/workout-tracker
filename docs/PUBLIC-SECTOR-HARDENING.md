@@ -1,8 +1,8 @@
-# Public-Sector Hardening Note (WWPS / Government)
+# Public-Sector Hardening Note (Government)
 
-> **Purpose.** How the Target A design changes when the customer is a regulated World Wide
-> Public Sector / government entity. The commercial design is the baseline; this note is
-> the delta a ProServe consultant would walk a public-sector customer through.
+> **Purpose.** How the Target A design changes for a regulated public-sector / government
+> deployment. The commercial design is the baseline; this note documents the delta needed
+> to meet public-sector requirements.
 
 ## 1. Account & region foundation
 
@@ -66,7 +66,7 @@
 
 ## Summary delta vs commercial baseline
 
-| Area | Commercial baseline (Target A) | WWPS hardened |
+| Area | Commercial baseline (Target A) | Public-sector hardened |
 |---|---|---|
 | Region | us-east-1 | GovCloud (US) or Control Tower-governed commercial |
 | Ingress | CloudFront + WAF | Same, + geo-restriction, origin verification, stricter WAF |

@@ -72,8 +72,8 @@ export class WorkoutTrackerStack extends cdk.Stack {
 
     // ---- cdk-nag: intentional demo trade-offs, each with a justification ----
     // These are the *documented* gaps between the cheap demo and a production build.
-    // In an interview: "cdk-nag runs in CI; every suppression is a conscious, reasoned
-    // decision, not an unknown." The production fixes are listed in infra/README.md.
+    // Every suppression is a conscious, reasoned decision, not an unknown.
+    // The production fixes are listed in infra/README.md.
     NagSuppressions.addStackSuppressions(this, [
       {
         id: 'AwsSolutions-IAM4',
@@ -89,7 +89,7 @@ export class WorkoutTrackerStack extends cdk.Stack {
       },
       {
         id: 'AwsSolutions-VPC7',
-        reason: 'VPC Flow Logs omitted to avoid demo CloudWatch cost; enable for production / WWPS audit.',
+        reason: 'VPC Flow Logs omitted to avoid demo CloudWatch cost; enable for production audit.',
       },
       {
         id: 'AwsSolutions-RDS6',
@@ -104,15 +104,15 @@ export class WorkoutTrackerStack extends cdk.Stack {
       },
       {
         id: 'AwsSolutions-COG2',
-        reason: 'MFA not required for the demo. Enable (and consider mandatory) for production / WWPS.',
+        reason: 'MFA not required for the demo. Enable (and consider mandatory) for production.',
       },
       {
         id: 'AwsSolutions-COG8',
-        reason: 'Cognito Plus feature plan (advanced security/MFA) is off to avoid demo cost; enable for production / WWPS.',
+        reason: 'Cognito Plus feature plan (advanced security/MFA) is off to avoid demo cost; enable for production.',
       },
       {
         id: 'AwsSolutions-CFR1',
-        reason: 'Geo restriction not needed for a personal demo; add for WWPS data-residency requirements.',
+        reason: 'Geo restriction not needed for a personal demo; add for public-sector data-residency requirements.',
       },
       {
         id: 'AwsSolutions-CFR2',
