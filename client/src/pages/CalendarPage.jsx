@@ -68,13 +68,21 @@ export default function CalendarPage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-semibold text-white">{prettyDate}</h2>
-            <button
-              onClick={handleCreate}
-              disabled={creating}
-              className="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
-            >
-              {creating ? 'Creating…' : '+ New workout'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => navigate('/scan', { state: { date: selectedYMD } })}
+                className="px-3 py-1.5 rounded-lg border border-border text-muted hover:text-white hover:border-accent text-sm font-medium transition-colors"
+              >
+                📷 Scan notebook page
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={creating}
+                className="px-3 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                {creating ? 'Creating…' : '+ New workout'}
+              </button>
+            </div>
           </div>
 
           {workoutsOnSelected.length === 0 ? (

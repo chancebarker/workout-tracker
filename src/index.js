@@ -10,7 +10,7 @@ import progressRoutes from './routes/progress.js'
 const app = express()
 const PORT = process.env.PORT || 3000
 
-app.use(express.json())
+app.use(express.json({ limit: '8mb' })) // raised from the default ~100kb for base64 photo uploads
 
 app.use('/auth', authRoutes)
 app.use('/exercises', exerciseRoutes)
