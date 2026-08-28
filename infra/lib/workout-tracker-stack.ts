@@ -7,6 +7,7 @@ import { Auth } from './constructs/auth'
 import { Compute } from './constructs/compute'
 import { Frontend } from './constructs/frontend'
 import { Observability } from './constructs/observability'
+import { BudgetAlarm } from './constructs/budget'
 
 /**
  * Target A — Serverless (Refactor).
@@ -57,6 +58,13 @@ export class WorkoutTrackerStack extends cdk.Stack {
 
     // 6) Observability — tracing + a starter dashboard/alarm for the function.
     new Observability(this, 'Observability', { fn: compute.fn })
+
+    // 7) Budget — account-wide monthly cost alert (separate from the Anthropic API's own
+    //    console spend cap, which only covers the photo-scan feature's API usage).
+    new BudgetAlarm(this, 'Budget', {
+      notificationEmail: 'chance.r.barker+workout-app@gmail.com',
+      monthlyLimitUsd: 20,
+    })
 
     // ---- Outputs you'll use after deploy ----
     new cdk.CfnOutput(this, 'SiteUrl', { value: `https://${frontend.distributionDomainName}` })
