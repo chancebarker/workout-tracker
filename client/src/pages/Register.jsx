@@ -10,7 +10,7 @@ export default function Register() {
   const [code, setCode] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
-  const { signUp, confirm, signIn } = useAuth()
+  const { signUp, confirm, signIn, requiresConfirmation } = useAuth()
   const navigate = useNavigate()
 
   async function handleSignUp(e) {
@@ -19,7 +19,11 @@ export default function Register() {
     setError(null)
     try {
       await signUp({ email, password, name })
-      setStep('confirm') // Cognito emails a verification code
+      if (requiresConfirmation) {
+        setStep('confirm') // Cognito emails a verification code
+      } else {
+        navigate('/') // local dev: register already logs you in
+      }
     } catch (err) {
       setError(err.message || 'Sign up failed')
     } finally {

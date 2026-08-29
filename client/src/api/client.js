@@ -1,5 +1,5 @@
 import { config } from '../config'
-import { getIdToken } from '../auth/cognito'
+import { getIdToken } from '../auth'
 
 const BASE_URL = config.apiBase
 

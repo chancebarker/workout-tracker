@@ -12,4 +12,9 @@ export const config = {
   userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID,
   clientId: import.meta.env.VITE_COGNITO_CLIENT_ID,
   apiBase: import.meta.env.VITE_API_BASE || '/api',
+  // Local dev (no Cognito env vars set) falls back to the local backend's own JWT auth —
+  // see client/src/auth/index.js. Production builds always set both vars, so this is
+  // 'cognito' there, unconditionally.
+  authMode: (import.meta.env.VITE_COGNITO_USER_POOL_ID && import.meta.env.VITE_COGNITO_CLIENT_ID)
+    ? 'cognito' : 'local',
 }
