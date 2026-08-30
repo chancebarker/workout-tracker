@@ -36,6 +36,14 @@ export class Compute extends Construct {
   constructor(scope: Construct, id: string, props: ComputeProps) {
     super(scope, id)
 
+    // Anthropic API key for the notebook-photo workout parser. CDK creates this with a
+    // random placeholder value — set the real key after deploy:
+    //   aws secretsmanager put-secret-value --secret-id workout-tracker/anthropic-api-key --secret-string <key>
+    const anthropicSecret = new secretsmanager.Secret(this, 'AnthropicApiKeySecret', {
+      secretName: 'workout-tracker/anthropic-api-key',
+      description: 'Anthropic API key for the notebook-photo workout parser.',
+    })
+
     this.fn = new NodejsFunction(this, 'ApiFn', {
       runtime: lambda.Runtime.NODEJS_20_X,
       entry: path.join(__dirname, '..', '..', 'lambda', 'api', 'index.mjs'),
@@ -51,6 +59,7 @@ export class Compute extends Construct {
         // Useful if the app ever verifies tokens itself; the API GW authorizer already does.
         USER_POOL_ID: props.userPool.userPoolId,
         USER_POOL_CLIENT_ID: props.userPoolClient.userPoolClientId,
+        ANTHROPIC_SECRET_ARN: anthropicSecret.secretArn,
         NODE_OPTIONS: '--enable-source-maps',
       },
       bundling: {
@@ -68,6 +77,7 @@ export class Compute extends Construct {
     // grantDataApiAccess permits rds-data:* on the cluster and reading its admin secret.
     props.cluster.grantDataApiAccess(this.fn)
     props.dbSecret.grantRead(this.fn)
+    anthropicSecret.grantRead(this.fn)
 
     // --- HTTP API with a Cognito JWT authorizer as the default ---
     const authorizer = new HttpUserPoolAuthorizer('CognitoAuthorizer', props.userPool, {

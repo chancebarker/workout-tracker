@@ -14,14 +14,14 @@ and Infrastructure-as-Code with AWS CDK (TypeScript).
 3. **[MIGRATION-RUNBOOK.md](./MIGRATION-RUNBOOK.md)** — phased data migration + cutover,
    with dual-run/rollback (DMS / DataSync / MGN where they apply).
 4. **[../infra/](../infra/)** — the CDK project. Target A fully built; Target B stubbed.
-5. **[PUBLIC-SECTOR-HARDENING.md](./PUBLIC-SECTOR-HARDENING.md)** — how the design changes
-   for a regulated public-sector/government deployment.
 
 ## Operations
 
 - **[OPERATIONS-RUNBOOK.md](./OPERATIONS-RUNBOOK.md)** — run and maintain the live app:
   Cognito user admin, troubleshooting, cost management, deploy/rollback, and the
   email-reliability + SSO/federation roadmap.
+- **[DEPLOY-RUNBOOK.md](./DEPLOY-RUNBOOK.md)** — exact command-line steps to ship a code
+  change to the live stack: DB migration, `cdk diff`/`deploy`, secret rotation, smoke test.
 
 ## One-line thesis
 

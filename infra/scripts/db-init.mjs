@@ -57,24 +57,50 @@ async function main() {
 
   const countRes = await exec('SELECT COUNT(*)::int AS c FROM exercises', [], 'JSON')
   const count = JSON.parse(countRes.formattedRecords)[0].c
+  const strOrNull = (v) => (v == null ? { isNull: true } : { stringValue: v })
+
   if (count > 0) {
-    console.log(`Exercises already seeded (${count}); skipping.`)
+    console.log(`Exercises already seeded (${count}); skipping insert.`)
   } else {
     console.log('Seeding exercises…')
     for (const ex of exercises) {
       await exec(
-        `INSERT INTO exercises (name, equipment, primary_muscle, is_compound, is_custom)
-         VALUES (:name, :equipment, :muscle, :comp, FALSE)`,
+        `INSERT INTO exercises (name, equipment, primary_muscle, is_compound, is_custom, description, cues, secondary_muscles)
+         VALUES (:name, :equipment, :muscle, :comp, FALSE, :description, :cues, :secondary)`,
         [
           { name: 'name', value: { stringValue: ex.name } },
           { name: 'equipment', value: { stringValue: ex.equipment } },
           { name: 'muscle', value: { stringValue: ex.primaryMuscle } },
           { name: 'comp', value: { booleanValue: ex.isCompound } },
+          { name: 'description', value: strOrNull(ex.description) },
+          { name: 'cues', value: strOrNull(ex.cues) },
+          { name: 'secondary', value: strOrNull(ex.secondaryMuscles) },
         ]
       )
     }
     console.log(`  Seeded ${exercises.length} exercises.`)
   }
+
+  // Backfill description/cues/secondary_muscles onto rows that predate these columns
+  // (e.g. exercises seeded before this migration). Idempotent — only touches rows
+  // still missing content, never custom exercises (name match only hits library rows).
+  console.log('Backfilling description/cues/secondary_muscles…')
+  let backfilled = 0
+  for (const ex of exercises) {
+    const res = await exec(
+      `UPDATE exercises SET description = :description, cues = :cues, secondary_muscles = :secondary
+       WHERE name = :name AND is_custom = FALSE AND description IS NULL`,
+      [
+        { name: 'description', value: strOrNull(ex.description) },
+        { name: 'cues', value: strOrNull(ex.cues) },
+        { name: 'secondary', value: strOrNull(ex.secondaryMuscles) },
+        { name: 'name', value: { stringValue: ex.name } },
+      ]
+    )
+    backfilled += res.numberOfRecordsUpdated ?? 0
+  }
+  console.log(`  Backfilled ${backfilled} rows.`)
+
   console.log('Done.')
 }
 

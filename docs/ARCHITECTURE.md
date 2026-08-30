@@ -5,8 +5,8 @@
 > assessment (Step 1) and the migration strategy with two candidate target
 > architectures and an explicit trade-off analysis (Step 2). The chosen target is
 > recorded in [ADR-0001](./adr/0001-target-architecture-serverless-vs-containers.md);
-> migration mechanics, CDK implementation, and public-sector hardening follow in separate
-> documents once this design is approved.
+> migration mechanics and CDK implementation follow in separate documents once this
+> design is approved.
 
 > **Accuracy notes (current build, not a template):**
 > - The API is **Node.js / Express**, so the serverless target wraps the existing app
@@ -125,7 +125,6 @@ erDiagram
 | Binary assets | None today | No S3 object pipeline / DataSync needed yet |
 | Auth | Custom JWT + bcrypt | Replace with Cognito (managed, MFA-capable) — counts as refactor effort |
 | Availability need | Personal project; not yet mission-critical | Single-AZ acceptable for now; document the Multi-AZ upgrade path |
-| Compliance | None for the personal app | But a public-sector deployment requires a documented hardening path (see hardening note) |
 | Build artifacts | SPA compiles to static files | Natural fit for S3 + CloudFront (no server needed for frontend) |
 
 ---
@@ -287,5 +286,5 @@ Decision recorded in **[ADR-0001](./adr/0001-target-architecture-serverless-vs-c
 
 ---
 
-> **⏸ PAUSE FOR REVIEW.** Steps 3–5 (migration runbook, CDK implementation, public-sector
-> hardening) proceed after sign-off on this design.
+> **⏸ PAUSE FOR REVIEW.** Steps 3–4 (migration runbook, CDK implementation) proceed after
+> sign-off on this design.

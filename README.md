@@ -54,7 +54,7 @@ and costs are in [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) and the
 client/   React SPA (Vite)
 src/      Local Express API + SQLite (the "on-prem before")
 infra/    AWS CDK app (the deployed serverless stack) + Lambda API + scripts
-docs/     Architecture, ADR, migration runbook, public-sector hardening, ops runbook
+docs/     Architecture, ADR, migration runbook, deploy runbook, ops runbook
 ```
 
 ## Run it locally
@@ -76,5 +76,5 @@ Cognito outputs → `cdk deploy` again. Tear down anytime with `cdk destroy`.
 ## Documentation
 
 Design and operations docs live in [`docs/`](./docs/) — architecture, the decision record,
-the migration runbook, a public-sector hardening note, and an operations runbook for
-running it day-to-day.
+the migration runbook, a deploy runbook, and an operations runbook for running it
+day-to-day.
