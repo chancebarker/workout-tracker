@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { api } from '../api/client'
 
@@ -15,6 +15,7 @@ export default function ProgressPage() {
   const [summary, setSummary] = useState(null)
   const [prs, setPRs] = useState([])
   const [exercises, setExercises] = useState([])
+  const [search, setSearch] = useState('')
   const [selected, setSelected] = useState('')
   const [series, setSeries] = useState([])
   const [error, setError] = useState(null)
@@ -23,7 +24,7 @@ export default function ProgressPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [s, p, ex] = await Promise.all([api.getSummary(), api.getPRs(), api.getExercises()])
+        const [s, p, ex] = await Promise.all([api.getSummary(), api.getPRs(), api.getLoggedExercises()])
         setSummary(s); setPRs(p); setExercises(ex)
       } catch (err) {
         setError(err.message)
@@ -32,11 +33,16 @@ export default function ProgressPage() {
     load()
   }, [])
 
-  async function loadSeries(exerciseId) {
-    setSelected(exerciseId)
-    if (!exerciseId) { setSeries([]); return }
+  const filteredExercises = useMemo(() => {
+    const needle = search.trim().toLowerCase()
+    if (!needle) return exercises
+    return exercises.filter(ex => ex.name.toLowerCase().includes(needle))
+  }, [exercises, search])
+
+  async function loadSeries(exercise) {
+    setSelected(exercise.id)
     try {
-      const data = await api.getExerciseProgress(exerciseId)
+      const data = await api.getExerciseProgress(exercise.id)
       setSeries(data.data_points)
     } catch (err) {
       setError(err.message)
@@ -44,8 +50,8 @@ export default function ProgressPage() {
   }
 
   // From the PR table: select the exercise and scroll up to its chart
-  async function showExercise(exerciseId) {
-    await loadSeries(String(exerciseId))
+  async function showExercise(pr) {
+    await loadSeries({ id: pr.exercise_id, name: pr.exercise_name })
     chartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
@@ -64,14 +70,36 @@ export default function ProgressPage() {
 
       <div className="mb-6" ref={chartRef}>
         <label className="block text-sm text-muted mb-1">Exercise progression (heaviest set per day)</label>
-        <select
-          value={selected}
-          onChange={e => loadSeries(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-border text-white text-sm focus:outline-none focus:border-accent mb-4"
-        >
-          <option value="">Select an exercise…</option>
-          {exercises.map(ex => <option key={ex.id} value={ex.id}>{ex.name}</option>)}
-        </select>
+        <input
+          type="text"
+          placeholder="Search your exercises…"
+          value={search}
+          onChange={e => { setSearch(e.target.value); setSelected('') }}
+          className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-border text-white text-sm focus:outline-none focus:border-accent mb-2"
+        />
+
+        {exercises.length === 0 ? (
+          <p className="text-muted text-sm mb-4">Log some sets to see your exercises here.</p>
+        ) : (
+          <div className="max-h-40 overflow-y-auto mb-4 space-y-1">
+            {filteredExercises.length === 0 && (
+              <p className="text-muted text-sm px-1">No logged exercises match "{search}".</p>
+            )}
+            {filteredExercises.map(ex => (
+              <button
+                key={ex.id}
+                onClick={() => loadSeries(ex)}
+                className={[
+                  'w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between',
+                  selected === ex.id ? 'bg-surface-2 text-white' : 'text-muted hover:text-white hover:bg-surface-2'
+                ].join(' ')}
+              >
+                <span>{ex.name}</span>
+                <span className="text-xs text-muted">{ex.primary_muscle}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {selected && series.length > 0 && (
           <div className="bg-surface border border-border rounded-xl p-4">
@@ -110,7 +138,7 @@ export default function ProgressPage() {
                 {prs.map(pr => (
                   <tr
                     key={pr.exercise_id}
-                    onClick={() => showExercise(pr.exercise_id)}
+                    onClick={() => showExercise(pr)}
                     className="border-b border-border/50 last:border-0 cursor-pointer hover:bg-surface-2 transition-colors"
                   >
                     <td className="px-4 py-2 text-white">{pr.exercise_name}</td>

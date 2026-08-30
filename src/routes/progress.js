@@ -33,6 +33,24 @@ router.get('/exercise/:exerciseId', (req, res) => {
   res.json({ exercise_id: exercise.id, exercise_name: exercise.name, data_points })
 })
 
+// Distinct exercises the user has logged at least one set for. Used to scope the
+// progress-page exercise picker to exercises with actual history, including bodyweight
+// movements (no weight logged) that the PR endpoint below excludes.
+router.get('/logged-exercises', (req, res) => {
+  const userId = req.user.user_id
+
+  const exercises = db.prepare(`
+    SELECT DISTINCT e.id, e.name, e.primary_muscle
+    FROM workout_exercises we
+    JOIN workouts w ON we.workout_id = w.id
+    JOIN exercises e ON we.exercise_id = e.id
+    WHERE w.user_id = ?
+    ORDER BY e.name
+  `).all(userId)
+
+  res.json(exercises)
+})
+
 // Heaviest single set ever, per exercise the user has logged.
 router.get('/prs', (req, res) => {
   const userId = req.user.user_id

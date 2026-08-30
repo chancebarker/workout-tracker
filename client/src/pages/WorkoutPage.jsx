@@ -143,7 +143,7 @@ export default function WorkoutPage() {
 
   return (
     <div>
-      <button onClick={() => navigate('/')} className="text-sm text-muted hover:text-white mb-3">← Calendar</button>
+      <button onClick={() => navigate('/')} className="text-sm text-muted hover:text-white mb-3">← Tracker</button>
 
       <div className="flex items-start justify-between gap-3 mb-1">
         <input

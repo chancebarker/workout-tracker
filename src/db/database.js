@@ -8,7 +8,19 @@ db.pragma('foreign_keys = ON')
 
 db.exec(schema)
 
+// Lightweight migration for columns added after this table already existed on disk.
+// This repo has no migration framework — CREATE TABLE IF NOT EXISTS is a no-op against
+// an already-created table, so new columns need an explicit, idempotent ALTER TABLE.
+for (const column of ['description TEXT', 'cues TEXT', 'secondary_muscles TEXT']) {
+  try {
+    db.exec(`ALTER TABLE exercises ADD COLUMN ${column}`)
+  } catch (err) {
+    if (!err.message.includes('duplicate column name')) throw err
+  }
+}
+
 export default db
 
-import { seedDatabase } from './seed.js'
+import { seedDatabase, backfillExerciseContent } from './seed.js'
 seedDatabase()
+backfillExerciseContent()

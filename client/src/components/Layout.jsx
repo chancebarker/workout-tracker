@@ -22,8 +22,10 @@ export default function Layout({ children }) {
       <header className="border-b border-border bg-surface/60 backdrop-blur sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <span className="text-white font-semibold mr-4">🏋️ Tracker</span>
-            <NavLink to="/" className={navClass} end>Calendar</NavLink>
+            <NavLink to="/" end className="text-white font-semibold mr-4 hover:text-accent transition-colors">
+              🏋️ Tracker
+            </NavLink>
+            <NavLink to="/exercises" className={navClass}>Exercises</NavLink>
             <NavLink to="/metrics" className={navClass}>Metrics</NavLink>
             <NavLink to="/progress" className={navClass}>Progress</NavLink>
           </div>

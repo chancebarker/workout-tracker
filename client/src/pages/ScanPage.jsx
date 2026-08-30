@@ -118,7 +118,7 @@ export default function ScanPage() {
 
   return (
     <div>
-      <button onClick={() => navigate('/')} className="text-sm text-muted hover:text-white mb-3">← Calendar</button>
+      <button onClick={() => navigate('/')} className="text-sm text-muted hover:text-white mb-3">← Tracker</button>
       <h1 className="text-2xl font-bold text-white mb-4">Scan notebook page</h1>
 
       {error && <p className="text-danger text-sm mb-3">{error}</p>}

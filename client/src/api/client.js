@@ -75,6 +75,7 @@ export const api = {
 
   // Progress
   getSummary: () => request('/progress/summary'),
+  getLoggedExercises: () => request('/progress/logged-exercises'),
   getExerciseProgress: (exerciseId) => request(`/progress/exercise/${exerciseId}`),
   getPRs: () => request('/progress/prs'),
 }

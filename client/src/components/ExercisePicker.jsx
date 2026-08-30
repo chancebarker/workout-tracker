@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api } from '../api/client'
-
-const EQUIPMENT = ['barbell', 'dumbbells', 'bodyweight']
-const MUSCLES = ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Forearms',
-  'Quads', 'Hamstrings', 'Glutes', 'Calves', 'Core', 'Traps']
+import { EQUIPMENT, MUSCLES } from '../utils/exerciseTaxonomy'
 
 export default function ExercisePicker({ onSelect, onClose }) {
   const [exercises, setExercises] = useState([])

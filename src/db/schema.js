@@ -15,6 +15,9 @@ export const schema = `
     is_compound INTEGER DEFAULT 0,
     is_custom INTEGER DEFAULT 0,
     created_by_user_id INTEGER REFERENCES users(id),
+    description TEXT,
+    cues TEXT,
+    secondary_muscles TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Calendar from 'react-calendar'
 import { api } from '../api/client'
 import { toYMD } from '../utils/date'
+import { quoteOfTheDay } from '../utils/quotes'
 
 function monthRange(date) {
   const from = new Date(date.getFullYear(), date.getMonth(), 1)
@@ -46,28 +47,33 @@ export default function CalendarPage() {
     }
   }
 
-  const prettyDate = selectedDate.toLocaleDateString(undefined, {
+  const todayPretty = new Date().toLocaleDateString(undefined, {
     weekday: 'long', month: 'long', day: 'numeric'
   })
+  const quote = quoteOfTheDay()
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-4">Calendar</h1>
+      <h1 className="text-2xl font-bold text-white mb-4">{todayPretty}</h1>
       {error && <p className="text-danger text-sm mb-3">{error}</p>}
 
       <div className="grid md:grid-cols-2 gap-6">
-        <Calendar
-          onChange={setSelectedDate}
-          value={selectedDate}
-          onActiveStartDateChange={({ activeStartDate }) => setActiveMonth(activeStartDate)}
-          tileClassName={({ date, view }) =>
-            view === 'month' && datesWithWorkouts.has(toYMD(date)) ? 'has-workout' : null
-          }
-        />
+        <div>
+          <Calendar
+            onChange={setSelectedDate}
+            value={selectedDate}
+            onActiveStartDateChange={({ activeStartDate }) => setActiveMonth(activeStartDate)}
+            tileClassName={({ date, view }) =>
+              view === 'month' && datesWithWorkouts.has(toYMD(date)) ? 'has-workout' : null
+            }
+          />
+          <p className="text-muted text-sm italic mt-4 px-1">
+            "{quote.text}"{quote.author && <span className="not-italic"> — {quote.author}</span>}
+          </p>
+        </div>
 
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-white">{prettyDate}</h2>
+          <div className="flex items-center justify-center mb-3">
             <div className="flex gap-2">
               <button
                 onClick={() => navigate('/scan', { state: { date: selectedYMD } })}

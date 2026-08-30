@@ -6,6 +6,7 @@ import Register from './pages/Register'
 import CalendarPage from './pages/CalendarPage'
 import WorkoutPage from './pages/WorkoutPage'
 import ScanPage from './pages/ScanPage'
+import ExercisesPage from './pages/ExercisesPage'
 import MetricsPage from './pages/MetricsPage'
 import ProgressPage from './pages/ProgressPage'
 
@@ -33,6 +34,7 @@ function AppRoutes() {
       <Route path="/" element={<PrivateRoute><CalendarPage /></PrivateRoute>} />
       <Route path="/workout/:id" element={<PrivateRoute><WorkoutPage /></PrivateRoute>} />
       <Route path="/scan" element={<PrivateRoute><ScanPage /></PrivateRoute>} />
+      <Route path="/exercises" element={<PrivateRoute><ExercisesPage /></PrivateRoute>} />
       <Route path="/metrics" element={<PrivateRoute><MetricsPage /></PrivateRoute>} />
       <Route path="/progress" element={<PrivateRoute><ProgressPage /></PrivateRoute>} />
       <Route path="*" element={<Navigate to="/" />} />

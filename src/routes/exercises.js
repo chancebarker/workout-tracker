@@ -24,14 +24,30 @@ router.get('/', (req, res) => {
     params.push(equipment)
   }
   if (muscle) {
-    query += ' AND primary_muscle = ?'
-    params.push(muscle)
+    // Matches primary_muscle exactly, or muscle as one of the comma-separated
+    // secondary_muscles tokens (padded with commas so "Glutes" doesn't false-match
+    // something like a hypothetical "GlutesFoo").
+    query += ` AND (primary_muscle = ? OR (',' || COALESCE(secondary_muscles, '') || ',') LIKE '%,' || ? || ',%')`
+    params.push(muscle, muscle)
   }
 
   query += ' ORDER BY primary_muscle, name'
 
   const exercises = db.prepare(query).all(...params)
   res.json(exercises)
+})
+
+// Get a single exercise (library exercises are visible to everyone; custom ones only
+// to the user who created them).
+router.get('/:id', (req, res) => {
+  const userId = req.user.user_id
+
+  const exercise = db.prepare(`
+    SELECT * FROM exercises WHERE id = ? AND (is_custom = 0 OR created_by_user_id = ?)
+  `).get(req.params.id, userId)
+
+  if (!exercise) return res.status(404).json({ error: 'Exercise not found' })
+  res.json(exercise)
 })
 
 const createExerciseSchema = z.object({
